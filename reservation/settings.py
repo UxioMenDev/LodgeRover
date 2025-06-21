@@ -52,9 +52,14 @@ INSTALLED_APPS = [
     "room",
     "paypal.standard.ipn",
     "payment",
-    'django_extensions',
-    'django_erd_generator',
 ]
+
+# Only add development apps when DEBUG is True
+if DEBUG:
+    INSTALLED_APPS.extend([
+        'django_extensions',
+        'django_erd_generator',
+    ])
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
