@@ -1,0 +1,49 @@
+services:
+  django:
+    build: .
+    command: >
+      sh -c "
+      python manage.py makemigrations &&
+      python manage.py migrate &&
+      python manage.py create_group &&
+      python manage.py create_rooms &&
+      python manage.py create_customers &&
+      python manage.py create_reservations &&
+      python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DOCKER=true
+
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: reservation
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+  pgweb:
+    image: sosedoff/pgweb
+    depends_on:
+      - db
+    ports:
+      - "8081:8081"
+    environment:
+      - PGWEB_DATABASE_URL=postgres://postgres:postgres@db:5432/reservation?sslmode=disable
+
+volumes:
+  postgres_data:

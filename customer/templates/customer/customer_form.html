@@ -1,0 +1,15 @@
+{% extends "reservation_app/base.html" %} 
+
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+<h1>Datos cliente</h1>
+<form method="post" class="min-vh-100">
+  {% csrf_token %} 
+  <div class="mb-3">
+  {{ form|crispy }}
+</div>
+  <button class="btn btn-success" type="submit">Aceptar</button>
+</form>
+{% endblock %}

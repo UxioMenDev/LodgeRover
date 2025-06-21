@@ -1,0 +1,67 @@
+{% extends "reservation_app/base.html" %} {% block content %}
+
+<div class="container" style="min-height: 100vh;">
+<h1>Clientes</h1>
+
+<div class="mb-3">
+<a href="{%url 'create_customer'%}" class="btn btn-success">Añadir cliente</a>
+</div>
+
+<div class="row">
+
+{% for customer in customers %} 
+
+<div class="col-md-4">
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ customer.name }} {{customer.last_name}}</h5>
+    <p class="card-text">Email: {{ customer.email }}</p>
+    <p class="card-text">Phone: {{ customer.phone }}</p>
+    <p class="card-text">Address: {{ customer.address }}</p>
+    <p class="card-text">Card number: {{ customer.card_number }}</p>
+    <a href="{%url 'update_customer' customer.id %}" class="btn btn-primary">Editar</a>
+    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{customer.id}}">Eliminar</button>
+  </div>
+</div>
+</div>
+
+<div
+  class="modal fade"
+  id="deleteModal{{customer.id}}"
+  tabindex="-1"
+  aria-labelledby="deleteModalLabel{{customer.id}}"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Advertencia</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>El elemento seleccionado se eliminará permanentemente</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+
+        <a href="{% url 'delete_customer' customer.id %}">
+          <button type="button" class="btn btn-danger">Eliminar</button>
+        </a>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+{% endfor %} 
+</div>
+</div>
+{% endblock %}

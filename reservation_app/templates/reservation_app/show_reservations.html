@@ -1,0 +1,178 @@
+{% extends "reservation_app/base.html" %} {% block content %}
+<script src="https://sandbox.paypal.com/sdk/js?client-id=Ad-B4r-0ghpp8zgUe1sYIcFre3BDC_FZEU6dlpvlA2hu1khG1eA8UHYUB7mVI5GfrYwqWV2gj_Kc5Fg0"></script>
+
+
+
+  <div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+          {% if user.is_staff %}
+            <div class="col-md-3">
+                <label for="search" class="form-label">Cliente</label>
+                <div class="input-group">
+                    <input type="text" 
+                           class="form-control" 
+                           id="search" 
+                           name="search" 
+                           placeholder="Buscar por nombre..."
+                           value="{{ search_query }}">
+                    <button class="btn btn-outline-success" type="submit">Buscar</button>
+                </div>
+            </div>
+      {% endif %}
+            <div class="col-md-3">
+                <label for="start_date" class="form-label">Fecha de entrada</label>
+                <input type="date" 
+                       class="form-control" 
+                       id="start_date" 
+                       name="start_date"
+                       value="{{ selected_date|default:'' }}">
+            </div>
+
+            <div class="col-md-3">
+                <label for="payment_status" class="form-label">Estado de pago</label>
+                <select class="form-select" id="payment_status" name="payment_status">
+                    <option value="">Todos</option>
+                    <option value="paid" {% if payment_status == 'paid' %}selected{% endif %}>Pagado</option>
+                    <option value="unpaid" {% if payment_status == 'unpaid' %}selected{% endif %}>Pendiente de pago</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Filtrar</button>
+                {% if search_query or selected_date or payment_status %}
+                    <a href="{% url 'show_reservations' %}" class="btn btn-secondary">Limpiar filtros</a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="container" style="min-height: 100vh;">
+
+
+  <div class="mb-3">
+<a href="{%url 'create_reservation'%}" class="btn btn-success">Crear reserva</a>
+</div>
+
+{% for reservation in reservations %} 
+
+
+<div class="card mb-3">
+  <div class="card-body">
+    <h5 class="card-title">{{ reservation.customer }} </h5>
+    <p class="card-text">From: {{ reservation.starting_date }}</p>
+    <p class="card-text">To: {{ reservation.end_date }}</p>
+    <p class="card-text">People: {{ reservation.people }}</p>
+    <div class="row">
+      {% for room in reservation.rooms.all %}
+      <div class="col-md-4">
+        <div class="card mb-3">
+          <div class="card-body">
+            <a href="{% url 'select_room' reservation.id  room.id %}"><img src="{{ room.photo.url }}" class="card-img-top"></a>
+            <p class="card-text"> Habitación {{ room.number }} </p>
+            <p class="card-text"> Precio: {{ room.price }} €</p>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    <p class="card-text"> Precio total: {{ reservation.price }} €</p>
+    <a href="{% url 'update_reservation' reservation.id %}?start_date={{ reservation.starting_date|date:'Y-m-d' }}&end_date={{ reservation.end_date|date:'Y-m-d' }}" class="btn btn-primary">Editar</a>
+    <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal{{reservation.id}}">Eliminar</button>    
+  </div>
+</div>
+
+<div
+  class="modal fade"
+  id="deleteModal{{reservation.id}}"
+  tabindex="-1"
+  aria-labelledby="deleteModalLabel{{reservation.id}}"
+  aria-hidden="true"
+>
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Advertencia</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <p>El elemento seleccionado se eliminará permanentemente</p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          Cancelar
+        </button>
+
+        <a href="{% url 'delete_reservation' reservation.id %}">
+          <button type="button" class="btn btn-danger">Eliminar</button>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+    {% if reservation.paid == False %}
+      {% if not user.is_staff %}
+    <div id="paypal-button-container-{{ reservation.id }}" class="btn">
+    <script>
+    var price = '{{ reservation.price }}'
+    paypal.Buttons({
+      style:{
+        label: 'pay',
+      },
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: price, 
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+          return actions.order.capture().then(function(details) {
+            return fetch("{% url 'payment' %}", {
+                method: 'post',
+                headers: {
+                    'content-type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    orderID: data.orderID,
+                    reservationID: '{{ reservation.id }}'
+                })
+            }).then(function(response) {
+                if (response.ok) {
+                    alert('Pago completado con éxito');
+                } else {
+                    alert('Hubo un problema con el pago');
+                }
+            });
+        });
+    }
+    }).render('#paypal-button-container-{{ reservation.id }}');
+</script>
+</div>
+{% endif %}
+      {% elif user.is_staff  %}
+<a href="{% url 'upload_images' reservation.id %}" class="btn btn-success mb-3">Check in</a>
+    {% else %}
+<div class="alert alert-success" role="alert">
+  Pagado
+</div>
+    </p>
+{% endif %}
+{% endfor %} 
+</div>
+
+
+
+
+{% endblock %}

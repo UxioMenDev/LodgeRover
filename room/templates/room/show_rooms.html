@@ -1,0 +1,31 @@
+{% extends "reservation_app/base.html" %} {% block content %}
+
+<h1>Habitaciones</h1>
+
+<div class="container" style="min-height: 100vh;">
+
+<div class="row">
+
+{% for room in rooms %} 
+
+<div class="col-md-5">
+<div class="card mb-3">
+  <div class="card-body">
+    <img src="{{ room.photo.url }}" class="card-img-top" alt="Imagen de la habitación">
+    <h5 class="card-title">Habitación {{ room.number }}</h5>
+    <p class="card-text">Capacidad: {{ room.capacity }}</p>
+    <p class="card-text">{{ room.description }}</p>    
+    <p class="card-text"><small class="text-muted">Precio por noche: {{ room.price }}</small></p>
+    <p class="card-text">Fechas disponibles:</p>
+    {% for date in dates %}
+    {% if date not in room.occupied_dates %}
+    <a href="{% url 'create_reservation_with_room' room date %}" class="card-text">{{date}}</a>
+    {% endif %}
+    {% endfor %}
+  </div>
+</div>
+</div>
+{% endfor %} 
+</div>
+</div>
+{% endblock %}

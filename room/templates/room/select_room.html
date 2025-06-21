@@ -1,0 +1,22 @@
+{% extends "reservation_app/base.html" %} {% block content %}
+
+<h1>Alojamientos</h1>
+
+<div class="row">
+
+{% for room in rooms %} 
+<div class="col-md-5">
+<div class="card mb-3">
+  <div class="card-body">
+    <img src="{{ room.photo.url }}" class="card-img-top" alt="Imagen de la habitación">
+    <h5 class="card-title"> {{ room.number }}</h5>
+    <p class="card-text">Capacidad: {{ room.capacity }}</p>
+    <p class="card-text">{{ room.description }}</p>
+    <p class="card-text"><small class="text-muted">Precio por noche: {{ room.price }}</small></p>
+    <a class="btn btn-success" href="{% url 'change_room' reservation.id old_room.id room.id %}">Cambiar</a>
+  </div>
+</div>
+</div>
+{% endfor %} 
+</div>
+{% endblock %}
