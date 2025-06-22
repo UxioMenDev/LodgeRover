@@ -1,31 +1,89 @@
-{% extends "reservation_app/base.html" %} {% block content %}
+{% extends "reservation_app/base.html" %}
 
+{% block title %}Habitaciones | LodgeRover{% endblock %}
+
+{% block extra_css %}
+<!-- Usar versión estable de FullCalendar -->
+<link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.css' rel='stylesheet' />
+{% endblock %}
+
+{% block content %}
 <h1>Habitaciones</h1>
 
-<div class="container" style="min-height: 100vh;">
-
 <div class="row">
-
-{% for room in rooms %} 
-
-<div class="col-md-5">
-<div class="card mb-3">
-  <div class="card-body">
-    <img src="{{ room.photo.url }}" class="card-img-top" alt="Imagen de la habitación">
-    <h5 class="card-title">Habitación {{ room.number }}</h5>
-    <p class="card-text">Capacidad: {{ room.capacity }}</p>
-    <p class="card-text">{{ room.description }}</p>    
-    <p class="card-text"><small class="text-muted">Precio por noche: {{ room.price }}</small></p>
-    <p class="card-text">Fechas disponibles:</p>
-    {% for date in dates %}
-    {% if date not in room.occupied_dates %}
-    <a href="{% url 'create_reservation_with_room' room date %}" class="card-text">{{date}}</a>
-    {% endif %}
+    {% for room in rooms %}
+    <div class="col-md-5 mb-4">
+        <div class="card h-100">
+            <img src="{{ room.photo.url }}" class="card-img-top" alt="Imagen de la habitación">
+            <div class="card-body">
+                <h5 class="card-title">Habitación {{ room.number }}</h5>
+                <p class="card-text">Capacidad: {{ room.capacity }}</p>
+                <p class="card-text">{{ room.description }}</p>
+                <p class="card-text"><small class="text-muted">Precio por noche: {{ room.price }}</small></p>
+                <p class="card-text">Fechas disponibles:</p>
+                <div id="calendar{{ room.id }}" style="height: 300px; border: 1px solid #ddd; background-color: #f8f9fa;"></div>
+            </div>
+        </div>
+    </div>
     {% endfor %}
-  </div>
 </div>
-</div>
-{% endfor %} 
-</div>
-</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Usar versión estable de FullCalendar v5 -->
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.min.js'></script>
+<script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/locales/es.js'></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    
+    // Verificar que FullCalendar esté disponible
+    if (typeof FullCalendar === 'undefined') {
+        console.error('FullCalendar no se ha cargado correctamente');
+        return;
+    }
+    
+    {% for room in rooms %}
+    var calendarEl{{ room.id }} = document.getElementById('calendar{{ room.id }}');
+    
+    if (calendarEl{{ room.id }}) {
+        try {
+            // Crear array de eventos dinámicamente
+            var events{{ room.id }} = [];
+            
+            // Añadir reservaciones existentes
+            {% for reservation in room.reservations.all %}
+              
+            {% endfor %}
+                        
+            var calendar{{ room.id }} = new FullCalendar.Calendar(calendarEl{{ room.id }}, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next',
+                    center: 'title',
+                    right: ''
+                },
+                height: 280,
+                locale: 'es',
+                events: events{{ room.id }},
+                eventDidMount: function(info) {
+                    info.el.setAttribute('title', 'Habitación ocupada: ' + info.event.title);
+                },
+                eventClick: function(info) {
+                    alert('Habitación: ' + info.event.title + '\nFecha: ' + info.event.startStr);
+                }
+            });
+            
+            calendar{{ room.id }}.render();
+            
+        } catch (error) {
+            console.error('❌ Error al crear calendario {{ room.id }}:', error);
+        }
+    } else {
+        console.error('❌ No se encontró el elemento calendar{{ room.id }}');
+    }
+    {% endfor %}
+    
+});
+</script>
 {% endblock %}
