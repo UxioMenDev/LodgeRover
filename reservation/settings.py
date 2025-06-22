@@ -63,6 +63,7 @@ if DEBUG:
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware", 
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -94,15 +95,23 @@ CRISPY_TEMPLATE_PACK = "bootstrap4"
 WSGI_APPLICATION = "reservation.wsgi.application"
 
 
-# Database
-# https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-
-
-
-# Database configuration for Render
+# Database configuration for multiple environments
 if os.getenv('DATABASE_URL'):
+    # Render production database
     DATABASES = {
         'default': dj_database_url.parse(os.getenv('DATABASE_URL'))
+    }
+elif os.getenv('POSTGRES_DB'):
+    # Docker environment
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': os.getenv('POSTGRES_DB'),
+            'USER': os.getenv('POSTGRES_USER'),
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+            'HOST': os.getenv('DB_HOST', 'db'),  
+            'PORT': os.getenv('DB_PORT', '5432'),
+        }
     }
 else:
     # Local development database
@@ -157,6 +166,10 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ] if (BASE_DIR / "static").exists() else []
+
+# WhiteNoise configuration (only for production)
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"

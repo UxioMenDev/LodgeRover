@@ -19,7 +19,14 @@ A PMS for managin reservations in hotels, touristic flats or rural homes.
 - PayPal integration
 
 
-## Requirements
+## Prerrequisites
+
+### 🖥️ Local
+
+- Python 3
+- PostgreSQL
+
+## 🐳 Docker
 
 - Docker
 - Docker Compose
@@ -28,15 +35,43 @@ A PMS for managin reservations in hotels, touristic flats or rural homes.
 
 1. Clone this repository.
 2. Navigate to the project directory.
-3. Build the Docker image:
+
+### 🖥️ Local
+1. Create vitual enviroment
+  ````Shell
+  python -m venv venv
+  `````
+
+2. Activate virtual enviroment
+  - Windows:
+````Shell
+venv\Scripts\activate
+`````
+  - Linux/Mac:
+````Shell
+source venv/bin/activate
+`````
+3. Install dependencies
+````Shell
+pip install -r requirements.txt
+`````
+4. run server
+````Shell
+python manage.py runserver
+`````
+
+### 🐳 Docker
+1. Build the Docker image:
   ```
   docker-compose build
   ```
-4. Start the services:
+2. Start the services:
   ```
   docker-compose up
   ```
-5. Access the application at `http://localhost:8000`.
+
+
+### Access the application at `http://localhost:8000`.
 
 ## Images
 ![image](https://github.com/user-attachments/assets/5623ed9d-3bf7-476c-a54d-c37a270f044a)

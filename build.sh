@@ -6,3 +6,8 @@ pip install -r requirements.txt
 
 python manage.py collectstatic --no-input
 python manage.py migrate
+python manage.py create_group 
+python manage.py create_rooms 
+python manage.py create_customers 
+python manage.py create_reservations 
+python manage.py create_superuser
