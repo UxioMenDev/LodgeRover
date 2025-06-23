@@ -20,6 +20,5 @@ def show_rooms(request):
         HttpResponse: La respuesta renderizada con la plantilla 'room/show_rooms.html' y el contexto.
     """
     rooms = Room.objects.all()
-    dates = [datetime.now().date() + timedelta(days=i) for i in range(15)]
-    context = {"rooms": rooms, "dates": dates}
+    context = {"rooms": rooms}
     return render(request, "room/show_rooms.html", context)
