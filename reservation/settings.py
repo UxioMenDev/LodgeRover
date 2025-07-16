@@ -52,6 +52,9 @@ INSTALLED_APPS = [
     "room",
     "paypal.standard.ipn",
     "payment",
+    "storages",
+    "boto3",
+
 ]
 
 # Only add development apps when DEBUG is True
@@ -171,8 +174,9 @@ STATICFILES_DIRS = [
 if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
+# Media files are handled by S3 (configured above)
+# MEDIA_URL = "https://lodgerover.s3.eu-west-3.amazonaws.com/rooms/"
+# MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -191,4 +195,66 @@ MESSAGE_TAGS = {
     messages.SUCCESS: "success",
     messages.WARNING: "warning",
     messages.ERROR: "danger",
+}
+
+# AWS S3 Configuration
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'lodgerover')
+AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
+AWS_S3_FILE_OVERWRITE = False
+AWS_DEFAULT_ACL = None  # No ACLs - use bucket policy for public access
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_ADDRESSING_STYLE = 'virtual'
+AWS_QUERYSTRING_AUTH = False  # No usar autenticación por query string para URLs públicas
+
+# S3 URL Configuration
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400',
+}
+
+# Django Storages Configuration (Django 5.1 syntax)
+STORAGES = {
+    'default': {
+        'BACKEND': 'reservation.storages.MediaStorage',
+    },
+    'staticfiles': {
+        'BACKEND': 'reservation.storages.StaticStorage',
+    },
+}
+
+# Media files configuration
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
+# Logging para depuración de boto3 y django-storages
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'storages': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'boto3': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+        'botocore': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
+    },
 }
