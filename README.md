@@ -73,6 +73,31 @@ python manage.py runserver
 
 ### Access the application at `http://localhost:8000`.
 
+
+## 🌥️ Supported Cloud Providers
+
+### AWS S3
+- **Service**: Amazon S3
+- **Bucket**
+- **Features**: Standard S3 storage
+
+### Azure Blob Storage
+- **Service**: Azure Blob Storage
+- **Features**: SAS tokens for secure access
+
+## 🔐 Security
+
+### AWS S3
+- Uses bucket policies for access control
+- Public read access for media files
+- IAM roles for secure access
+
+### Azure Blob Storage
+- Uses SAS tokens for secure access
+- **No public access required**
+- Time-limited URLs (1 hour default)
+- Automatic token regeneration
+
 ## Images
 ![image](https://github.com/user-attachments/assets/5623ed9d-3bf7-476c-a54d-c37a270f044a)
 ![image](https://github.com/user-attachments/assets/b003c31a-e237-48cc-9fc2-fcf155a546eb)

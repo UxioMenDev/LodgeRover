@@ -15,9 +15,16 @@ import dj_database_url
 from pathlib import Path
 from django.contrib.messages import constants as messages
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load environment variables from .env file
+try:
+    from dotenv import load_dotenv
+    load_dotenv(BASE_DIR / '.env')
+except ImportError:
+    # dotenv not installed, skip loading .env file
+    pass
 
 
 # SECURITY WARNING: keep the secret key used in production secret!
@@ -28,8 +35,12 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 # Render deployment
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
+AZURE_WEBAPP_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME')  # Azure App Service specific
+
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME, 'localhost', '127.0.0.1']
+elif AZURE_WEBAPP_HOSTNAME:
+    ALLOWED_HOSTS = [AZURE_WEBAPP_HOSTNAME, 'localhost', '127.0.0.1']
 else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
@@ -197,35 +208,62 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-# AWS S3 Configuration
-AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'lodgerover')
-AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
-AWS_S3_FILE_OVERWRITE = False
-AWS_DEFAULT_ACL = None  # No ACLs - use bucket policy for public access
-AWS_S3_SIGNATURE_VERSION = 's3v4'
-AWS_S3_ADDRESSING_STYLE = 'virtual'
-AWS_QUERYSTRING_AUTH = False  # No usar autenticación por query string para URLs públicas
+# Storage Configuration - Azure Blob Storage vs AWS S3
+USE_AZURE_STORAGE = os.getenv('AZURE_ACCOUNT_NAME') is not None
 
-# S3 URL Configuration
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-AWS_S3_OBJECT_PARAMETERS = {
-    'CacheControl': 'max-age=86400',
-}
+if USE_AZURE_STORAGE:
+    # Azure Blob Storage Configuration
+    AZURE_ACCOUNT_NAME = os.getenv('AZURE_ACCOUNT_NAME')
+    AZURE_ACCOUNT_KEY = os.getenv('AZURE_ACCOUNT_KEY')
+    AZURE_CONTAINER = os.getenv('AZURE_CONTAINER', 'media')
+    
+    # SAS Token configuration for secure access
+    AZURE_URL_EXPIRATION_SECS = int(os.getenv('AZURE_URL_EXPIRATION_SECS', '3600'))  # 1 hour default
+    AZURE_OVERWRITE_FILES = os.getenv('AZURE_OVERWRITE_FILES', 'False').lower() == 'true'
+    
+    # Django Storages Configuration for Azure using custom backends
+    STORAGES = {
+        'default': {
+            'BACKEND': 'reservation.azure_storage_backends.AzureMediaStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'reservation.azure_storage_backends.AzureStaticStorage',
+        },
+    }
+    
+    # Media files configuration for Azure (SAS tokens will be generated dynamically)
+    MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/media/'
+    
+else:
+    # AWS S3 Configuration (existing)
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'lodgerover')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None  # No ACLs - use bucket policy for public access
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_ADDRESSING_STYLE = 'virtual'
+    AWS_QUERYSTRING_AUTH = False  # No usar autenticación por query string para URLs públicas
 
-# Django Storages Configuration (Django 5.1 syntax)
-STORAGES = {
-    'default': {
-        'BACKEND': 'reservation.storages.MediaStorage',
-    },
-    'staticfiles': {
-        'BACKEND': 'reservation.storages.StaticStorage',
-    },
-}
+    # S3 URL Configuration
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
 
-# Media files configuration
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    # Django Storages Configuration (Django 5.1 syntax)
+    STORAGES = {
+        'default': {
+            'BACKEND': 'reservation.storages.MediaStorage',
+        },
+        'staticfiles': {
+            'BACKEND': 'reservation.storages.StaticStorage',
+        },
+    }
+
+    # Media files configuration
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
 
 # Logging para depuración de boto3 y django-storages
 LOGGING = {
