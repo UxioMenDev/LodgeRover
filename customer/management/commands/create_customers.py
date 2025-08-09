@@ -1,6 +1,6 @@
 import requests
 from django.core.management.base import BaseCommand
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, Group
 from customer.models import Customer
 
 class Command(BaseCommand):
@@ -18,13 +18,18 @@ class Command(BaseCommand):
             # Obtener datos de la API
             response = requests.get('https://api.generadordni.es/profiles/person')
             api_data = response.json()            
+            
+            customers_group = Group.objects.get(name="Customers")
+            
             users = [
                 User.objects.create_user(
                     username=f"{api_data[i-1].get('nombre_usuario')}",
                     password="abc123."
                 )
                 for i in range(0, 10)
-            ]
+            ]        
+            for user in users:
+                user.groups.add(customers_group)
             customers = [
                 Customer(
                     user=user,
