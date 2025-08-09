@@ -209,10 +209,9 @@ MESSAGE_TAGS = {
 }
 
 # Storage Configuration - Local vs Azure Blob Storage vs AWS S3
-USE_AWS_STORAGE = os.getenv('AWS_ACCESS_KEY_ID') is not None
-USE_AZURE_STORAGE = os.getenv('AZURE_ACCOUNT_NAME') is not None
+STORAGE_PROVIDER = os.getenv('STORAGE_PROVIDER') 
 
-if USE_AWS_STORAGE:
+if STORAGE_PROVIDER == 'aws':
     # AWS S3 Configuration
     AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
     AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
@@ -232,7 +231,7 @@ if USE_AWS_STORAGE:
     # Media files configuration
     MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
     
-elif USE_AZURE_STORAGE:
+elif STORAGE_PROVIDER == 'azure':
     # Azure Blob Storage Configuration
     AZURE_ACCOUNT_NAME = os.getenv('AZURE_ACCOUNT_NAME')
     AZURE_ACCOUNT_KEY = os.getenv('AZURE_ACCOUNT_KEY')

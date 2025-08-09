@@ -108,9 +108,6 @@ Create a `.env` file in the project root with the following configuration:
 # Django Configuration
 SECRET_KEY=your_secret_key_here
 
-# Storage Configuration
-USE_LOCAL_STORAGE=True  # Use local storage (media/ folder)
-# Set to False if using Azure/AWS cloud storage
 
 # PostgreSQL Database
 POSTGRES_DB=reservation
@@ -118,6 +115,8 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=your_postgres_password
 DB_HOST=localhost
 DB_PORT=5432
+
+STORAGE_PROVIDER='azure' or 'aws'
 
 # For Azure Blob Storage:
 AZURE_ACCOUNT_NAME=your_azure_account
