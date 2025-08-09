@@ -98,6 +98,46 @@ python manage.py runserver
 - Time-limited URLs (1 hour default)
 - Automatic token regeneration
 
+
+## ⚙️ Environment Variables
+
+Create a `.env` file in the project root with the following configuration:
+
+```env
+
+# Django Configuration
+SECRET_KEY=your_secret_key_here
+
+# Storage Configuration
+USE_LOCAL_STORAGE=True  # Use local storage (media/ folder)
+# Set to False if using Azure/AWS cloud storage
+
+# PostgreSQL Database
+POSTGRES_DB=reservation
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=your_postgres_password
+DB_HOST=localhost
+DB_PORT=5432
+
+# For Azure Blob Storage:
+AZURE_ACCOUNT_NAME=your_azure_account
+AZURE_ACCOUNT_KEY=your_azure_key
+AZURE_CONTAINER=media
+
+# For AWS S3:
+AWS_ACCESS_KEY_ID=your_aws_access_key
+AWS_SECRET_ACCESS_KEY=your_aws_secret_key
+AWS_STORAGE_BUCKET_NAME=your_bucket_name
+AWS_S3_REGION_NAME=your_region
+
+
+# Unsplash API (for room images)
+# Get your Access Key at: https://unsplash.com/developers
+UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
+
+```
+
+
 ## Images
 ![image](https://github.com/user-attachments/assets/5623ed9d-3bf7-476c-a54d-c37a270f044a)
 ![image](https://github.com/user-attachments/assets/b003c31a-e237-48cc-9fc2-fcf155a546eb)

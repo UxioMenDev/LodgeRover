@@ -208,15 +208,36 @@ MESSAGE_TAGS = {
     messages.ERROR: "danger",
 }
 
-# Storage Configuration - Azure Blob Storage vs AWS S3
+# Storage Configuration - Local vs Azure Blob Storage vs AWS S3
+USE_AWS_STORAGE = os.getenv('AWS_ACCESS_KEY_ID') is not None
 USE_AZURE_STORAGE = os.getenv('AZURE_ACCOUNT_NAME') is not None
 
-if USE_AZURE_STORAGE:
+if USE_AWS_STORAGE:
+    # AWS S3 Configuration
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'lodgerover')
+    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = None  
+    AWS_S3_SIGNATURE_VERSION = 's3v4'
+    AWS_S3_ADDRESSING_STYLE = 'virtual'
+    AWS_QUERYSTRING_AUTH = False  
+
+    # S3 URL Configuration
+    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    # Media files configuration
+    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    
+elif USE_AZURE_STORAGE:
     # Azure Blob Storage Configuration
     AZURE_ACCOUNT_NAME = os.getenv('AZURE_ACCOUNT_NAME')
     AZURE_ACCOUNT_KEY = os.getenv('AZURE_ACCOUNT_KEY')
     AZURE_CONTAINER = os.getenv('AZURE_CONTAINER', 'media')
-    
+
     # SAS Token configuration for secure access
     AZURE_URL_EXPIRATION_SECS = int(os.getenv('AZURE_URL_EXPIRATION_SECS', '3600'))  # 1 hour default
     AZURE_OVERWRITE_FILES = os.getenv('AZURE_OVERWRITE_FILES', 'False').lower() == 'true'
@@ -235,35 +256,19 @@ if USE_AZURE_STORAGE:
     MEDIA_URL = f'https://{AZURE_ACCOUNT_NAME}.blob.core.windows.net/{AZURE_CONTAINER}/media/'
     
 else:
-    # AWS S3 Configuration (existing)
-    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', 'lodgerover')
-    AWS_S3_REGION_NAME = os.getenv('AWS_S3_REGION_NAME', 'eu-west-3')
-    AWS_S3_FILE_OVERWRITE = False
-    AWS_DEFAULT_ACL = None  # No ACLs - use bucket policy for public access
-    AWS_S3_SIGNATURE_VERSION = 's3v4'
-    AWS_S3_ADDRESSING_STYLE = 'virtual'
-    AWS_QUERYSTRING_AUTH = False  # No usar autenticación por query string para URLs públicas
-
-    # S3 URL Configuration
-    AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.{AWS_S3_REGION_NAME}.amazonaws.com'
-    AWS_S3_OBJECT_PARAMETERS = {
-        'CacheControl': 'max-age=86400',
-    }
-
-    # Django Storages Configuration (Django 5.1 syntax)
+    # Local File Storage Configuration
     STORAGES = {
         'default': {
-            'BACKEND': 'reservation.storages.MediaStorage',
+            'BACKEND': 'django.core.files.storage.FileSystemStorage',
         },
         'staticfiles': {
-            'BACKEND': 'reservation.storages.StaticStorage',
+            'BACKEND': 'django.contrib.staticfiles.storage.StaticFilesStorage',
         },
     }
-
-    # Media files configuration
-    MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+    
+    # Media files configuration for local storage
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Logging para depuración de boto3 y django-storages
 LOGGING = {
@@ -296,3 +301,6 @@ LOGGING = {
         },
     },
 }
+
+# Unsplash API Configuration
+UNSPLASH_ACCESS_KEY = os.getenv('UNSPLASH_ACCESS_KEY')
