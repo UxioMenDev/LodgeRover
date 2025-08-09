@@ -139,7 +139,10 @@ UNSPLASH_ACCESS_KEY=your_unsplash_access_key_here
 
 ## Images
 ![image](https://github.com/user-attachments/assets/5623ed9d-3bf7-476c-a54d-c37a270f044a)
-![image](https://github.com/user-attachments/assets/b003c31a-e237-48cc-9fc2-fcf155a546eb)
-![image](https://github.com/user-attachments/assets/9d176212-abb6-407d-a60c-ab5136f0e0e2)
+<img width="1760" height="729" alt="image" src="https://github.com/user-attachments/assets/f8aaefec-3d9a-4870-ae79-9c6d89532fe8" />
+
+<img width="3671" height="1457" alt="image" src="https://github.com/user-attachments/assets/24eee591-044f-471a-ac96-26bf4d45ca24" />
+
+
 ![image](https://github.com/user-attachments/assets/db11f2c7-f648-4293-9ef6-e06526f83a6f)
 
