@@ -26,7 +26,7 @@ class Command(BaseCommand):
                     username=f"{api_data[i-1].get('nombre_usuario')}",
                     password="abc123."
                 )
-                for i in range(0, 10)
+                for i in range(10)
             ]        
             for user in users:
                 user.groups.add(customers_group)
@@ -40,7 +40,7 @@ class Command(BaseCommand):
                     address=f"{api_data[i-1].get('direccion')} {api_data[i-1].get('numero_via')} {api_data[i-1].get('codigo_postal')} {api_data[i-1].get('municipio')} {api_data[i-1].get('provincia')}",
                     card_number=api_data[i-1].get('tarjeta')
                 )
-                for i, user in enumerate(users, start=1)
+                for i, user in enumerate(users)
             ]
             Customer.objects.bulk_create(customers)
             self.stdout.write(self.style.SUCCESS("Clientes creados con éxito"))
