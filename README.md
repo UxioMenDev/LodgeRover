@@ -107,7 +107,7 @@ Create a `.env` file in the project root with the following configuration:
 
 # Django Configuration
 SECRET_KEY=your_secret_key_here
-
+DDNS_HOSTNAME=your_domain
 
 # PostgreSQL Database
 POSTGRES_DB=reservation

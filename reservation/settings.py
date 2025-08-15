@@ -33,16 +33,24 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'your-fallback-secret-key-for-local-dev')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
-# Render deployment
+#Deployment
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
-AZURE_WEBAPP_HOSTNAME = os.environ.get('WEBSITE_HOSTNAME')  # Azure App Service specific
+DDNS_HOSTNAME = os.environ.get('DDNS_HOSTNAME') 
 
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS = [RENDER_EXTERNAL_HOSTNAME, 'localhost', '127.0.0.1']
-elif AZURE_WEBAPP_HOSTNAME:
-    ALLOWED_HOSTS = [AZURE_WEBAPP_HOSTNAME, 'localhost', '127.0.0.1']
+elif DDNS_HOSTNAME:    
+    ALLOWED_HOSTS = [DDNS_HOSTNAME, 'localhost', '127.0.0.1']
+    CSRF_TRUSTED_ORIGINS = []
+    CSRF_TRUSTED_ORIGINS.extend([
+        'https://' + DDNS_HOSTNAME,
+        'http://localhost:8000',
+        'http://127.0.0.1:8000'
+    ])
 else:
     ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+
 
 
 # Application definition
